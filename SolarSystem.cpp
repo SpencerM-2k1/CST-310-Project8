@@ -12,10 +12,15 @@
 #endif
 #include <cmath>
 
-#include "Sphere.h"
+#include "Planet.h"
 
 // GLUT escape key id for readability
 #define KEY_ESCAPE 27
+
+//Planets (declared as global due to init function)
+Planet sun(2, 56, 24);
+Planet earth(1, 28, 12);
+Planet moon(0.5, 21, 9);
 
 /* = TODO =
 * Add keyboard control (r) to rotate the whole image.
@@ -82,14 +87,28 @@ GLfloat scale = 1.0f;
 // camera and drawing. The function nextAnimationFrame() moves the camera to
 // the next point and draws. The way that we get animation in OpenGL is to
 // register nextFrame as the idle function; this is done in main().
+GLfloat counter = 0.0f;
+
 void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  static Sphere sphere(1, 28, 12);
-  sphere.setPrimaryColor(std::begin({1.0f, 1.0f, 1.0f, 1.0f}));
-  sphere.setPrimaryColor(std::begin({0.0f, 0.0f, 0.0f, 1.0f}));
+  
+  
+  earth.orbitStep();
+  moon.orbitStep();
+  
+  counter += 0.10f;
+  //sun.setOffset(5.0f*sin(counter),0.0f,0.0f);
+  //sun.setOffset(0.0f,5.0f*sin(counter),0.0f);
+  //sun.setOffset(0.0f,0.0f,5.0f*sin(counter));
+  
 
-  sphere.draw();
+
+  //earth.setOffset(-5.0f, 0.0f, 0.0f);
+
+  sun.draw();
+  earth.draw();
+  moon.draw();
   //Cube::draw();
   glFlush();
   glutSwapBuffers();
@@ -101,10 +120,11 @@ void display() {
 // a weird tumbling effect.
 void timer(int v) {
   static GLfloat u = 0.0;
-  if(!stopFigure)
-    u += 0.01;
+  // if(!stopFigure)
+  //   u += 0.01;
   glLoadIdentity();
-  gluLookAt(8*cos(u), 7*cos(u)-1, 4*cos(u/3)+2, .5, .5, .5, cos(u), 1, 0);
+  //gluLookAt(8*cos(u), 7*cos(u)-1, 4*cos(u/3)+2, .5, .5, .5, cos(u), 1, 0);
+  gluLookAt(0, 14, 14, 0, 0, 0, 0, -1, 0);
   glutPostRedisplay();
   glutTimerFunc(1000/60.0, timer, v);
 }
@@ -128,6 +148,20 @@ void init() {
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+
+  //Planet data
+  sun.setSecondaryColor(1.0f, 0.55f, 0.0f, 1.0f);
+  sun.setPrimaryColor(1.0f, 0.78f, 0.0f, 1.0f);
+
+  earth.setParent(&sun);  //Earth orbits around sun
+  earth.setOrbit(8, 0.01f);
+  earth.setPrimaryColor(0.17f, 1.0f, 1.0f, 1.0f);
+  earth.setSecondaryColor(0.0f, 0.15f, 1.0f, 1.0f);
+
+  moon.setParent(&earth); //Moon orbits around earth
+  moon.setOrbit(3, 0.04f);
+  moon.setPrimaryColor(0.5f, 0.5f, 0.5f, 1.0f);
+  moon.setSecondaryColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void key_callback(unsigned char key, int dummy1, int dummy2)
