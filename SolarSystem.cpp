@@ -11,16 +11,38 @@
 #include <GL/glut.h>
 #endif
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
 
 #include "Planet.h"
 
 // GLUT escape key id for readability
-#define KEY_ESCAPE 27
+#define KEY_ESCAPE 2
 
 //Planets (declared as global due to init function)
 Planet sun(2, 56, 24);
-Planet earth(1, 28, 12);
-Planet moon(0.5, 21, 9);
+
+Planet mercury(0.2, 28, 12);
+
+Planet venus(0.45, 25, 15);
+
+Planet earth(0.45, 28, 12);
+Planet moon(0.15, 21, 9);
+
+Planet mars(0.45, 15, 20);
+Planet phobos(0.15, 21, 9);
+Planet deimos(0.15, 21, 9);
+
+
+Planet jupiter(1.1, 15, 25); 
+
+Planet saturn(0.75, 30, 35); 
+
+Planet uranus(0.65, 25, 30);  
+
+Planet neptune(0.60, 20, 30); 
+
 
 /* = TODO =
 * Add keyboard control (r) to rotate the whole image.
@@ -33,34 +55,34 @@ Planet moon(0.5, 21, 9);
 // white respectively.  The x-axis is the red gradient, the y-axis is the
 // green gradient, and the z-axis is the blue gradient.  The cube's position
 // and colors are fixed.
-namespace Cube {
+// namespace Cube {
 
-  const int NUM_VERTICES = 8;
-  const int NUM_FACES = 6;
+//   const int NUM_VERTICES = 8;
+//   const int NUM_FACES = 6;
 
-  GLint vertices[NUM_VERTICES][3] = {
-    {0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1},
-    {1, 0, 0}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}};
+//   GLint vertices[NUM_VERTICES][3] = {
+//     {0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {0, 1, 1},
+//     {1, 0, 0}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}};
 
-  GLint faces[NUM_FACES][4] = {
-    {1, 5, 7, 3}, {5, 4, 6, 7}, {4, 0, 2, 6},
-    {3, 7, 6, 2}, {0, 1, 3, 2}, {0, 4, 5, 1}};
+//   GLint faces[NUM_FACES][4] = {
+//     {1, 5, 7, 3}, {5, 4, 6, 7}, {4, 0, 2, 6},
+//     {3, 7, 6, 2}, {0, 1, 3, 2}, {0, 4, 5, 1}};
 
-  GLfloat vertexColors[NUM_VERTICES][3] = {
-    {0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0, 0.0}, {0.0, 1.0, 1.0},
-    {1.0, 0.0, 0.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 0.0}, {1.0, 1.0, 1.0}};
+//   GLfloat vertexColors[NUM_VERTICES][3] = {
+//     {0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0, 0.0}, {0.0, 1.0, 1.0},
+//     {1.0, 0.0, 0.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 0.0}, {1.0, 1.0, 1.0}};
 
-  void draw() {
-    glBegin(GL_QUADS);
-    for (int i = 0; i < NUM_FACES; i++) {
-      for (int j = 0; j < 4; j++) {
-        glColor3fv((GLfloat*)&vertexColors[faces[i][j]]);
-        glVertex3iv((GLint*)&vertices[faces[i][j]]);
-      }
-    }
-    glEnd();
-  }
-}
+//   void draw() {
+//     glBegin(GL_QUADS);
+//     for (int i = 0; i < NUM_FACES; i++) {
+//       for (int j = 0; j < 4; j++) {
+//         glColor3fv((GLfloat*)&vertexColors[faces[i][j]]);
+//         glVertex3iv((GLint*)&vertices[faces[i][j]]);
+//       }
+//     }
+//     glEnd();
+//   }
+// }
 
 
 //Player-controlled variables
@@ -89,13 +111,53 @@ GLfloat scale = 1.0f;
 // register nextFrame as the idle function; this is done in main().
 GLfloat counter = 0.0f;
 
+const int MAX_STARS = 5000;
+float starPositions[MAX_STARS][3];
+
+// Function to generate star positions
+void generateStarPositions(float starPositions[][3], int numStars, float sceneSize) {
+    srand(time(nullptr));
+
+    for (int i = 0; i < numStars; ++i) {
+        starPositions[i][0] = (static_cast<float>(rand()) / RAND_MAX) * 2 * sceneSize - sceneSize;
+        starPositions[i][1] = (static_cast<float>(rand()) / RAND_MAX) * 2 * sceneSize - sceneSize;
+        starPositions[i][2] = (static_cast<float>(rand()) / RAND_MAX) * 2 * sceneSize - sceneSize;
+    }
+}
+
+
+// Function to draw stars using pre-generated positions
+void drawStars() {
+    glPointSize(1.0f); // Set point size to draw stars
+
+    // Set color to white for stars
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glBegin(GL_POINTS);
+    for (int i = 0; i < MAX_STARS; ++i) {
+        glVertex3f(starPositions[i][0], starPositions[i][1], starPositions[i][2]);
+    }
+    glEnd();
+}
+
 void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  
+  mercury.orbitStep();
+  venus.orbitStep();
   
   earth.orbitStep();
   moon.orbitStep();
+
+  mars.orbitStep();
+  phobos.orbitStep();
+  deimos.orbitStep();
+
+  jupiter.orbitStep();
+  saturn.orbitStep();
+  uranus.orbitStep();
+  neptune.orbitStep();
+
   
   counter += 0.10f;
   //sun.setOffset(5.0f*sin(counter),0.0f,0.0f);
@@ -107,9 +169,24 @@ void display() {
   //earth.setOffset(-5.0f, 0.0f, 0.0f);
 
   sun.draw();
+
+  mercury.draw();
+  venus.draw();
+
   earth.draw();
   moon.draw();
-  //Cube::draw();
+
+  mars.draw();
+  phobos.draw();
+  deimos.draw();
+
+  jupiter.draw();
+  saturn.draw();
+  uranus.draw();
+  neptune.draw();
+
+  drawStars(); 
+
   glFlush();
   glutSwapBuffers();
 }
@@ -147,11 +224,21 @@ void reshape(int w, int h) {
 void init() {
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
-  glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.1f);
 
   //Planet data
   sun.setSecondaryColor(1.0f, 0.55f, 0.0f, 1.0f);
   sun.setPrimaryColor(1.0f, 0.78f, 0.0f, 1.0f);
+
+  mercury.setParent(&sun);
+  mercury.setOrbit(3, 0.03f);
+  mercury.setPrimaryColor(0.5f, 0.0f, 0.0f, 0.0f);
+  mercury.setSecondaryColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+  venus.setParent(&sun);
+  venus.setOrbit(6, 0.015f); 
+  venus.setPrimaryColor(0.8f, 0.2f, 0.0f, 1.0f); 
+  venus.setSecondaryColor(0.1f, 0.1f, 0.1f, 1.0f);
 
   earth.setParent(&sun);  //Earth orbits around sun
   earth.setOrbit(8, 0.01f);
@@ -159,9 +246,47 @@ void init() {
   earth.setSecondaryColor(0.0f, 0.15f, 1.0f, 1.0f);
 
   moon.setParent(&earth); //Moon orbits around earth
-  moon.setOrbit(3, 0.04f);
+  moon.setOrbit(1, 0.04f);
   moon.setPrimaryColor(0.5f, 0.5f, 0.5f, 1.0f);
   moon.setSecondaryColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+  mars.setParent(&sun);
+  mars.setOrbit(11, 0.007f);
+  mars.setPrimaryColor(1.0f, 0.0f, 0.0f, 0.0f);
+  mars.setSecondaryColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+  phobos.setParent(&mars); //Moon orbits around earth
+  phobos.setOrbit(1, 0.04f);
+  phobos.setPrimaryColor(0.5f, 0.5f, 0.5f, 1.0f);
+  phobos.setSecondaryColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+  deimos.setParent(&mars); //Moon orbits around earth
+  deimos.setOrbit(1.2, 0.05f);
+  deimos.setPrimaryColor(0.5f, 0.5f, 0.5f, 1.0f);
+  deimos.setSecondaryColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+  jupiter.setParent(&sun);
+  jupiter.setOrbit(15, 0.005f); 
+  jupiter.setPrimaryColor(0.9f, 0.6f, 0.3f, 1.0f); 
+  jupiter.setSecondaryColor(0.1f, 0.1f, 0.1f, 1.0f); 
+
+  saturn.setParent(&sun);
+  saturn.setOrbit(18, 0.009f); 
+  saturn.setPrimaryColor(0.8f, 0.7f, 0.2f, 1.0f); 
+  saturn.setSecondaryColor(0.1f, 0.1f, 0.1f, 1.0f); 
+
+  uranus.setParent(&sun);
+  uranus.setOrbit(21, 0.0015f); 
+  uranus.setPrimaryColor(0.5f, 0.8f, 0.9f, 1.0f); 
+  uranus.setSecondaryColor(0.1f, 0.1f, 0.1f, 1.0f); 
+
+  neptune.setParent(&sun);
+  neptune.setOrbit(24, 0.001f); 
+  neptune.setPrimaryColor(0.2f, 0.4f, 0.9f, 1.0f); 
+  neptune.setSecondaryColor(0.1f, 0.1f, 0.1f, 1.0f); 
+
+  generateStarPositions(starPositions, MAX_STARS, 50.0f);
+
 }
 
 void key_callback(unsigned char key, int dummy1, int dummy2)
