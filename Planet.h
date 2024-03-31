@@ -33,6 +33,7 @@ class Planet {
 	GLfloat _color2[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
 public:
+	Planet();
 	Planet(GLfloat radius, GLint numSectors, GLint numStacks);
 	void draw();
 
@@ -43,12 +44,16 @@ public:
 	void setOrbit(GLfloat speed, GLfloat radius, GLfloat progress);	//Defines radius and speed of orbit
 	void setOffset(GLfloat x, GLfloat y, GLfloat z);
 	void orbitStep();
+	void setSize(GLfloat radius);
 
 	void setPrimaryColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 	void setSecondaryColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 
 	Vertex getAbsolutePos();
 };
+
+//Default Constructor
+Planet::Planet() {}
 
 //Constructor
 Planet::Planet(GLfloat radius, GLint numSectors, GLint numStacks)
@@ -150,6 +155,10 @@ void Planet::orbitStep()
 
 	setOffset(x, y, z);
 	//_offset = Vertex(x, y, z);
+}
+
+void Planet::setSize(GLfloat radius) {
+	_radius = radius;
 }
 
 //Polygon rgb values
