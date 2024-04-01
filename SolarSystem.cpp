@@ -262,7 +262,7 @@ int main(int argc, char** argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glutInitWindowSize(750, 750);
-  glutCreateWindow("The RGB Color Cube");
+  glutCreateWindow("The Solar System");
   glutReshapeFunc(reshape);
   glutTimerFunc(100, timer, 0);
   glutDisplayFunc(display);
