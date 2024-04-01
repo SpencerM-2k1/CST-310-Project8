@@ -1,9 +1,6 @@
 //g++ SolarSystem.cpp -o main -lglfw -lGLU -lGL -lglut
 
-// This program is a flyby around the RGB color cube.  One intersting note
-// is that because the cube is a convex polyhedron and it is the only thing
-// in the scene, we can render it using backface culling only. i.e., there
-// is no need for a depth buffer.
+// Displays a model of the solar system with 8 planets, several moons, and varying orbit sizes & speeds
 
 #ifdef __APPLE_CC__
 #include <GLUT/glut.h>
@@ -48,14 +45,6 @@ Planet neptune(0.60, 20, 30);
 
 //Zoom control
 GLint distance = 28;
-
-// Display and Animation. To draw we just clear the window and draw the cube.
-// Because our main window is double buffered we have to swap the buffers to
-// make the drawing visible. Animation is achieved by successively moving our
-// camera and drawing. The function nextAnimationFrame() moves the camera to
-// the next point and draws. The way that we get animation in OpenGL is to
-// register nextFrame as the idle function; this is done in main().
-GLfloat counter = 0.0f;
 
 const int MAX_STARS = 5000;
 float starPositions[MAX_STARS][3];
@@ -106,17 +95,7 @@ void display() {
   saturn.orbitStep();
   uranus.orbitStep();
   neptune.orbitStep();
-
   
-  counter += 0.10f;
-  //sun.setOffset(5.0f*sin(counter),0.0f,0.0f);
-  //sun.setOffset(0.0f,5.0f*sin(counter),0.0f);
-  //sun.setOffset(0.0f,0.0f,5.0f*sin(counter));
-  
-
-
-  //earth.setOffset(-5.0f, 0.0f, 0.0f);
-
   sun.draw();
 
   mercury.draw();
@@ -140,15 +119,8 @@ void display() {
   glutSwapBuffers();
 }
 
-// We'll be flying around the cube by moving the camera along the orbit of the
-// curve u->(8*cos(u), 7*cos(u)-1, 4*cos(u/3)+2).  We keep the camera looking
-// at the center of the cube (0.5, 0.5, 0.5) and vary the up vector to achieve
-// a weird tumbling effect.
+// Timer function-- trigger a redisplay
 void timer(int v) {
-  static GLfloat u = 0.0;
-  // if(!stopFigure)
-  //   u += 0.01;
-  //gluLookAt(8*cos(u), 7*cos(u)-1, 4*cos(u/3)+2, .5, .5, .5, cos(u), 1, 0);
   glutPostRedisplay();
   glutTimerFunc(1000/60.0, timer, v);
 }
@@ -165,9 +137,7 @@ void reshape(int w, int h) {
   glMatrixMode(GL_MODELVIEW);
 }
 
-// Application specific initialization:  The only thing we really need to do
-// is enable back face culling because the only thing in the scene is a cube
-// which is a convex polyhedron.
+// Initialization: Depth testing, planet attributes, star positions
 void init() {
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -243,13 +213,13 @@ void key_callback(unsigned char key, int dummy1, int dummy2)
     case (KEY_ESCAPE): //Quit
       exit(0);
     case ('+'):
-    case ('='):
+    case ('='): //Zoom in works without shift/caps lock
     distance--;
     if (distance < 4)
       distance = 4;
       break;
     case ('-'):
-    case ('_'):
+    case ('_'): //Zoom out works with shift/caps lock
     distance++;
     if (distance > 35)
       distance = 35;
